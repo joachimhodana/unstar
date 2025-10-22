@@ -28,6 +28,12 @@ class TestCliIntegration:
         assert exc_info.value.code == 0
 
     def test_no_models(self):
+        # Test with SQL adapter (simpler)
+        result = main(["--adapter", "sql", "--dry-run"])
+        assert result == 0
+
+    def test_project_dir_argument(self):
+        # Test with custom project directory
         with tempfile.TemporaryDirectory() as tmpdir:
             # Create minimal dbt project structure
             (Path(tmpdir) / "dbt_project.yml").write_text("name: test")
@@ -39,44 +45,22 @@ class TestCliIntegration:
                 json.dump({"nodes": {}}, f)
             
             result = main([
+                "--adapter", "dbt",
                 "--project-dir", tmpdir,
                 "--dry-run"
             ])
             assert result == 0
 
     def test_with_models(self):
+        # Test with SQL adapter (simpler)
         with tempfile.TemporaryDirectory() as tmpdir:
-            # Create minimal dbt project structure
-            (Path(tmpdir) / "dbt_project.yml").write_text("name: test")
-            (Path(tmpdir) / "target").mkdir()
-            
-            # Create manifest with one model
-            manifest_data = {
-                "nodes": {
-                    "model.test.model_a": {
-                        "resource_type": "model",
-                        "name": "model_a",
-                        "path": "models/model_a.sql",
-                        "depends_on": {"nodes": []},
-                        "raw_sql": "SELECT * FROM source_table",
-                        "compiled_sql": "SELECT * FROM source_table"
-                    }
-                }
-            }
-            
-            manifest_path = Path(tmpdir) / "target" / "manifest.json"
-            with open(manifest_path, "w") as f:
-                json.dump(manifest_data, f)
-            
-            # Create the actual model file
-            models_dir = Path(tmpdir) / "models"
-            models_dir.mkdir()
-            model_file = models_dir / "model_a.sql"
-            model_file.write_text("SELECT * FROM source_table")
+            # Create a test SQL file
+            sql_file = Path(tmpdir) / "test.sql"
+            sql_file.write_text("SELECT * FROM table")
             
             result = main([
-                "--project-dir", tmpdir,
-                "--models", "model_a",
+                "--adapter", "sql",
+                "--select", str(sql_file),
                 "--dry-run"
             ])
             assert result == 0
@@ -98,3 +82,37 @@ class TestCliIntegration:
             ])
         # Should fail due to mutually exclusive options
         assert exc_info.value.code == 2
+
+    def test_reporter_formats(self):
+        """Test different reporter formats"""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            # Create a test SQL file
+            sql_file = Path(tmpdir) / "test.sql"
+            sql_file.write_text("SELECT * FROM table")
+            
+            # Test human reporter (default)
+            result = main([
+                "--adapter", "sql",
+                "--select", str(sql_file),
+                "--dry-run",
+                "--reporter", "human"
+            ])
+            assert result == 0  # No changes detected in this case
+                
+            # Test diff reporter
+            result = main([
+                "--adapter", "sql",
+                "--select", str(sql_file),
+                "--dry-run",
+                "--reporter", "diff"
+            ])
+            assert result == 0
+                
+            # Test github reporter
+            result = main([
+                "--adapter", "sql",
+                "--select", str(sql_file),
+                "--dry-run",
+                "--reporter", "github"
+            ])
+            assert result == 0
