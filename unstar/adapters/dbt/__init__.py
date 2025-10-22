@@ -22,12 +22,12 @@ class DbtAdapter(Adapter):
         return os.path.exists(os.path.join(project_dir, "dbt_project.yml"))
 
     def list_models(
-        self, project_dir: str, models: Optional[Sequence[str]], path: Optional[str]
+        self, project_dir: str, models: Optional[Sequence[str]], path: Optional[str], manifest_path: Optional[str] = None
     ) -> Iterable[ModelTarget]:  # type: ignore[override]
         # Store project_dir for use in read_sql
         self._project_dir = project_dir
-        # TODO: Support custom manifest path from CLI args
-        artifacts = load_artifacts(project_dir)
+        # Use custom manifest path if provided
+        artifacts = load_artifacts(project_dir, manifest_path)
         if artifacts is None:
             return []
 
