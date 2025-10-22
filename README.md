@@ -6,10 +6,15 @@ Expand `SELECT *` to explicit columns using downstream model analysis.
 
 ```bash
 # Basic installation
-pip install unstar
+pip install git+https://github.com/your-org/unstar.git
 
 # With dbt support
-pip install unstar[dbt]
+pip install "git+https://github.com/your-org/unstar.git#egg=unstar[dbt]"
+
+# Development installation
+git clone https://github.com/your-org/unstar.git
+cd unstar
+uv sync --dev
 ```
 
 ## Usage
@@ -27,17 +32,23 @@ unstar --path models/staging --write --backup
 unstar --output ./expanded_models
 ```
 
-### Testing
+### Quick Start
 
 ```bash
-# Install with uv
-uv sync --dev
+# Install with dbt support
+pip install "git+https://github.com/your-org/unstar.git#egg=unstar[dbt]"
 
-# Run tests
-uv run pytest tests/ -v
+# Navigate to your dbt project
+cd your-dbt-project
 
-# Test CLI
-uv run unstar --help
+# Run dbt to generate artifacts
+dbt compile
+
+# See what would change (dry run)
+unstar --dry-run
+
+# Apply changes with backup
+unstar --write --backup
 ```
 
 ### Command Options
@@ -83,14 +94,26 @@ SELECT id, name, email FROM {{ ref('raw_users') }}
 ## Development
 
 ```bash
-# Install with dev dependencies
+# Clone and setup
+git clone https://github.com/your-org/unstar.git
+cd unstar
+
+# Install with uv (recommended)
+uv sync --dev
+
+# Or with pip
 pip install -e ".[dev]"
 
 # Run tests
-pytest
+uv run pytest tests/ -v
+# or: pytest tests/ -v
 
 # Run linting
-ruff check .
+uv run ruff check .
+# or: ruff check .
+
+# Test CLI
+uv run unstar --help
 ```
 
 ## License
