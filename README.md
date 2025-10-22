@@ -115,6 +115,8 @@ Use `unstar` in your CI pipeline to enforce explicit column selection:
 
 ### GitHub Actions Example
 
+Lint SQL models for SELECT * usage in CI/CD pipeline.
+
 ```yaml
 name: Lint SQL Models
 on: [push, pull_request]
