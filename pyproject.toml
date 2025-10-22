@@ -1,0 +1,70 @@
+[build-system]
+requires = ["hatchling>=1.25.0"]
+build-backend = "hatchling.build"
+
+[project]
+name = "unstar"
+version = "0.1.0"
+description = "Unstar CLI"
+readme = "README.md"
+requires-python = ">=3.9"
+authors = [{ name = "Your Name", email = "you@example.com" }]
+license = { file = "LICENSE" }
+keywords = ["cli"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+]
+dependencies = []
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8",
+  "ruff>=0.6.8",
+  "pre-commit>=3.8",
+  "coverage>=7",
+]
+
+[project.urls]
+Homepage = "https://github.com/your-org/unstar"
+Repository = "https://github.com/your-org/unstar"
+Issues = "https://github.com/your-org/unstar/issues"
+
+[project.scripts]
+unstar = "unstar.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = [
+  { include = "unstar" },
+]
+
+[tool.hatch.build]
+# include README and LICENSE in sdist/wheel
+include = ["README.md", "LICENSE"]
+
+[tool.uv]
+index-url = "https://pypi.org/simple"
+
+[tool.uv.workspace]
+members = ["."]
+
+[tool.ruff]
+line-length = 100
+target-version = "py39"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "C4"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+[tool.pytest.ini_options]
+addopts = "-q"
+testpaths = ["tests"]
+
+[tool.coverage.run]
+branch = true
+source = ["unstar"]
