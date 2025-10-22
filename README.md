@@ -6,13 +6,13 @@ Expand `SELECT *` to explicit columns using downstream model analysis.
 
 ```bash
 # Basic installation
-pip install git+https://github.com/your-org/unstar.git
+pip install git+https://github.com/joachimhodana/unstar.git
 
 # With dbt support
-pip install "git+https://github.com/your-org/unstar.git#egg=unstar[dbt]"
+pip install "git+https://github.com/joachimhodana/unstar.git#egg=unstar[dbt]"
 
 # Development installation
-git clone https://github.com/your-org/unstar.git
+git clone https://github.com/joachimhodana/unstar.git
 cd unstar
 uv sync --dev
 ```
@@ -36,7 +36,7 @@ unstar --output ./expanded_models
 
 ```bash
 # Install with dbt support
-pip install "git+https://github.com/your-org/unstar.git#egg=unstar[dbt]"
+pip install "git+https://github.com/joachimhodana/unstar.git#egg=unstar[dbt]"
 
 # Navigate to your dbt project
 cd your-dbt-project
@@ -95,7 +95,7 @@ SELECT id, name, email FROM {{ ref('raw_users') }}
 
 ```bash
 # Clone and setup
-git clone https://github.com/your-org/unstar.git
+git clone https://github.com/joachimhodana/unstar.git
 cd unstar
 
 # Install with uv (recommended)
