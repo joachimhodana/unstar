@@ -38,8 +38,8 @@ def _load_with_parser(manifest_path: str, project_dir: str) -> Optional[DbtArtif
         if getattr(node, "resource_type", None) != "model":
             continue
         name = node.name
-        # file_path relative to project root
-        rel_path = getattr(node, "path", None) or getattr(node, "original_file_path", None) or ""
+        # file_path relative to project root - prefer original_file_path as it's more reliable
+        rel_path = getattr(node, "original_file_path", None) or getattr(node, "path", None) or ""
         abs_path = os.path.abspath(os.path.join(project_dir, rel_path))
         depends = list(getattr(node, "depends_on", {}).get("nodes", []))
         models[name] = DbtModel(
@@ -67,7 +67,7 @@ def _load_raw_json(manifest_path: str, project_dir: str) -> DbtArtifacts:
         if node.get("resource_type") != "model":
             continue
         name = node.get("name")
-        rel_path = node.get("path") or node.get("original_file_path") or ""
+        rel_path = node.get("original_file_path") or node.get("path") or ""
         abs_path = os.path.abspath(os.path.join(project_dir, rel_path))
         depends = list(node.get("depends_on", {}).get("nodes", []))
         if name:
