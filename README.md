@@ -116,6 +116,10 @@ uv run ruff check .
 uv run unstar --help
 ```
 
+## Credits
+
+This project's structure and approach was inspired by [dbt-artifacts-parser](https://github.com/yu-iskw/dbt-artifacts-parser) by [@yu-iskw](https://github.com/yu-iskw), which provides excellent Python parsing for dbt artifacts.
+
 ## License
 
 MIT
