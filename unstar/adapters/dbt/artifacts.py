@@ -83,8 +83,10 @@ def _load_raw_json(manifest_path: str, project_dir: str) -> DbtArtifacts:
     return DbtArtifacts(project_dir=project_dir, models_by_name=models)
 
 
-def load_artifacts(project_dir: str) -> Optional[DbtArtifacts]:
-    manifest_path = os.path.join(project_dir, "target", "manifest.json")
+def load_artifacts(project_dir: str, manifest_path: Optional[str] = None) -> Optional[DbtArtifacts]:
+    if manifest_path is None:
+        manifest_path = os.path.join(project_dir, "target", "manifest.json")
+    
     if not os.path.exists(manifest_path):
         return None
 

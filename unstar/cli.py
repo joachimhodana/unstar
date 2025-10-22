@@ -13,10 +13,12 @@ from .core.expander import expand_select_stars
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="unstar", description="Expand SELECT * safely")
     parser.add_argument("-V", "--version", action="version", version=__version__)
-    parser.add_argument("--adapter", choices=["dbt"], default="dbt")
+    parser.add_argument("--adapter", choices=["dbt", "sql"], default="dbt")
     parser.add_argument("--project-dir", default=".")
     parser.add_argument("--models", nargs="*")
     parser.add_argument("--path")
+    parser.add_argument("--files", nargs="*", help="Specific SQL files to process")
+    parser.add_argument("--manifest", help="Custom path to manifest.json (for dbt)")
 
     modes = parser.add_mutually_exclusive_group()
     modes.add_argument("--write", action="store_true", help="Edit files in place")
@@ -40,6 +42,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     # Ensure adapters are registered
     if args.adapter == "dbt":
         from .adapters import dbt as _  # noqa: F401
+    elif args.adapter == "sql":
+        from .adapters import sql as _  # noqa: F401
 
     adapter = get_adapter(args.adapter)
 

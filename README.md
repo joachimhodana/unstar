@@ -28,8 +28,24 @@ unstar --project-dir . --models model_a model_b --dry-run
 # Write changes in place (with backup)
 unstar --path models/staging --write --backup
 
+# Use custom manifest path
+unstar --manifest custom/path/manifest.json --models model_a --dry-run
+
 # Output to new directory
 unstar --output ./expanded_models
+```
+
+### Individual SQL Files
+
+```bash
+# Process specific SQL files
+unstar --adapter sql --files model1.sql model2.sql --dry-run
+
+# Process all SQL files in a directory
+unstar --adapter sql --path ./sql_files --dry-run
+
+# Write changes to specific files
+unstar --adapter sql --files models/integration/a.sql --write --backup
 ```
 
 ### Quick Start
@@ -53,10 +69,12 @@ unstar --write --backup
 
 ### Command Options
 
-- `--adapter {dbt}` - Adapter to use (default: dbt)
+- `--adapter {dbt,sql}` - Adapter to use (default: dbt)
 - `--project-dir PATH` - Project root directory (default: .)
-- `--models MODEL1 MODEL2` - Specific models to process
-- `--path PATH` - Directory containing models to process
+- `--models MODEL1 MODEL2` - Specific dbt models to process
+- `--files FILE1 FILE2` - Specific SQL files to process
+- `--path PATH` - Directory containing models/files to process
+- `--manifest PATH` - Custom path to dbt manifest.json
 - `--write` - Edit files in place
 - `--dry-run` - Show diff without making changes (default)
 - `--output DIR` - Write updated files to directory

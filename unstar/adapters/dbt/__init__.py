@@ -21,6 +21,7 @@ class DbtAdapter(Adapter):
     def list_models(
         self, project_dir: str, models: Optional[Sequence[str]], path: Optional[str]
     ) -> Iterable[ModelTarget]:  # type: ignore[override]
+        # TODO: Support custom manifest path from CLI args
         artifacts = load_artifacts(project_dir)
         if artifacts is None:
             return []
