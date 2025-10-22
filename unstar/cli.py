@@ -48,12 +48,19 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     adapter = get_adapter(args.adapter)
 
     # Determine targets
-    targets = list(adapter.list_models(args.project_dir, args.models, args.path))
+    if args.adapter == "sql" and args.files:
+        # For SQL adapter, use files instead of models
+        targets = list(adapter.list_models(args.project_dir, args.files, args.path))
+    else:
+        # For dbt adapter, use models
+        targets = list(adapter.list_models(args.project_dir, args.models, args.path))
+    
     if not targets:
         print("unstar: no models selected")
         return 0
 
     exit_code = 0
+    changes_detected = False
 
     for t in targets:
         original_sql = adapter.read_sql(t)
@@ -64,6 +71,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
         if new_sql == original_sql:
             continue
+
+        changes_detected = True
 
         if args.dry_run:
             diff = unified_diff(t.path, original_sql, t.path, new_sql)
@@ -87,6 +96,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         # Default when no mode provided: dry-run
         diff = unified_diff(t.path, original_sql, t.path, new_sql)
         print(diff)
+    
+    # Return 1 if changes were detected in dry-run mode (for CI/linting)
+    if args.dry_run and changes_detected:
+        return 1
+    
     return exit_code
 
 
