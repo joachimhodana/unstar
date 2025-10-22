@@ -109,6 +109,61 @@ SELECT id, name, email FROM {{ ref('raw_users') }}
 - Ambiguous joins may produce warnings
 - No downstream usage found will leave `*` unchanged
 
+## CI/CD Integration
+
+Use `unstar` in your CI pipeline to enforce explicit column selection:
+
+### GitHub Actions Example
+
+```yaml
+name: Lint SQL Models
+on: [push, pull_request]
+
+jobs:
+  lint-sql:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          
+      - name: Install dbt and unstar
+        run: |
+          pip install dbt-core
+          pip install "git+https://github.com/joachimhodana/unstar.git#egg=unstar[dbt]"
+          
+      - name: Compile dbt models
+        run: dbt compile
+        
+      - name: Check for SELECT * usage
+        run: unstar --dry-run
+        # Exit code 1 if changes needed, 0 if all models are clean
+```
+
+### Pre-commit Hook
+
+```yaml
+# .pre-commit-config.yaml
+repos:
+  - repo: local
+    hooks:
+      - id: unstar-check
+        name: Check for SELECT * usage
+        entry: unstar --dry-run
+        language: system
+        pass_filenames: false
+        always_run: true
+```
+
+### Exit Codes
+
+- `0`: No changes needed (all models use explicit columns)
+- `1`: Changes detected (some models have `SELECT *` that can be expanded)
+- `2`: Error occurred (invalid arguments, missing files, etc.)
+
 ## Development
 
 ```bash
