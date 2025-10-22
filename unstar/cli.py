@@ -110,18 +110,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 # GitHub Actions format
                 print(f"::warning file={t.path}::SELECT * can be expanded to explicit columns")
             elif args.reporter == "human":
-                # Human-readable format with better styling
+                # Human-readable format - simple one line
                 columns = sorted(scope.get('', set()))
                 if columns:
-                    print(f"✨ Model: {t.name}")
-                    print(f"   📍 File: {t.path}")
-                    print(f"   🔄 SELECT * → {', '.join(columns)}")
-                    print(f"   📊 Columns: {len(columns)}")
-                    print()
+                    print(f"Model {t.name}: SELECT * → {', '.join(columns)}")
                 else:
-                    print(f"⚠️  Model: {t.name} - No downstream columns found")
-                    print(f"   📍 File: {t.path}")
-                    print()
+                    print(f"Model {t.name}: No downstream columns found")
             continue
 
         if args.output:
@@ -140,13 +134,6 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         diff = unified_diff(t.path, original_sql, t.path, new_sql)
         print(diff)
     
-    # Add summary for human reporter
-    if args.dry_run and changes_detected and args.reporter == "human":
-        print("🎯 Summary:")
-        print(f"   📝 Models processed: {len(targets)}")
-        print(f"   ✨ Models with SELECT *: {sum(1 for t in targets if 'SELECT *' in adapter.read_sql(t))}")
-        print(f"   🔄 Ready for expansion!")
-        print()
     
     # Return 1 if changes were detected in dry-run mode (for CI/linting)
     if args.dry_run and changes_detected:
