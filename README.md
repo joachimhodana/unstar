@@ -23,29 +23,32 @@ uv sync --dev
 
 ```bash
 # Dry run - see what would change
-unstar --project-dir . --models model_a model_b --dry-run
+unstar --adapter dbt --select model_a model_b --dry-run
 
 # Write changes in place (with backup)
-unstar --path models/staging --write --backup
+unstar --adapter dbt --select models/staging --write --backup
+
+# Use custom project directory
+unstar --adapter dbt --project-dir /path/to/dbt/project --select model_a --dry-run
 
 # Use custom manifest path
-unstar --manifest custom/path/manifest.json --models model_a --dry-run
+unstar --adapter dbt --manifest custom/path/manifest.json --select model_a --dry-run
 
 # Output to new directory
-unstar --output ./expanded_models
+unstar --adapter dbt --output ./expanded_models
 ```
 
 ### Individual SQL Files
 
 ```bash
 # Process specific SQL files
-unstar --adapter sql --files model1.sql model2.sql --dry-run
+unstar --select model1.sql model2.sql --dry-run
 
 # Process all SQL files in a directory
-unstar --adapter sql --path ./sql_files --dry-run
+unstar --select ./sql_files --dry-run
 
 # Write changes to specific files
-unstar --adapter sql --files models/integration/a.sql --write --backup
+unstar --select models/integration/a.sql --write --backup
 ```
 
 ### Quick Start
@@ -69,21 +72,26 @@ unstar --write --backup
 
 ### Command Options
 
-- `--adapter {dbt,sql}` - Adapter to use (default: dbt)
+- `--select SELECTION` - Models/files to process (like dbt select syntax)
+- `--adapter {dbt,sql}` - Adapter to use (default: sql)
 - `--project-dir PATH` - Project root directory (default: .)
-- `--models MODEL1 MODEL2` - Specific dbt models to process
-- `--files FILE1 FILE2` - Specific SQL files to process
-- `--path PATH` - Directory containing models/files to process
-- `--manifest PATH` - Custom path to dbt manifest.json
+- `--manifest PATH` - Custom path to dbt manifest.json (dbt adapter only)
 - `--write` - Edit files in place
-- `--dry-run` - Show diff without making changes (default)
+- `--dry-run` - Show changes without applying (default)
 - `--output DIR` - Write updated files to directory
+- `--reporter {human,diff,github}` - Output format for dry-run (default: human)
 - `--backup` - Create .bak files when writing in place
 - `--verbose` - Show detailed output
 
+### Reporter Formats
+
+- `human` - Human-readable summary (default)
+- `diff` - Unified diff format
+- `github` - GitHub Actions annotations format
+
 ## How It Works
 
-1. **Model Selection**: Choose models by name (`--models`) or directory (`--path`)
+1. **Model Selection**: Choose models using `--select` (like dbt syntax)
 2. **Downstream Analysis**: Analyzes downstream models to determine which columns are actually used
 3. **Star Expansion**: Replaces `SELECT *` with explicit column lists based on usage
 4. **Safe Updates**: Supports dry-run, in-place editing with backups, or output to new directory
@@ -141,7 +149,7 @@ jobs:
         run: dbt compile
         
       - name: Check for SELECT * usage
-        run: unstar --dry-run
+        run: unstar --adapter dbt --dry-run --reporter github
         # Exit code 1 if changes needed, 0 if all models are clean
 ```
 
@@ -154,7 +162,7 @@ repos:
     hooks:
       - id: unstar-check
         name: Check for SELECT * usage
-        entry: unstar --dry-run
+        entry: unstar --adapter dbt --dry-run
         language: system
         pass_filenames: false
         always_run: true
