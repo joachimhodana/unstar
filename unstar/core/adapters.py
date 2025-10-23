@@ -1,7 +1,7 @@
 from __future__ import annotations
 
+from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
-from typing import Dict, Iterable, Optional, Sequence, Set
 
 
 @dataclass
@@ -22,13 +22,11 @@ class Adapter:
         raise NotImplementedError
 
     def list_models(
-        self, project_dir: str, models: Optional[Sequence[str]], path: Optional[str]
+        self, project_dir: str, models: Sequence[str] | None, path: str | None
     ) -> Iterable[ModelTarget]:
         raise NotImplementedError
 
-    def get_downstream_columns(
-        self, project_dir: str, target: ModelTarget
-    ) -> Dict[str, Set[str]]:
+    def get_downstream_columns(self, project_dir: str, target: ModelTarget) -> dict[str, set[str]]:
         """Return mapping alias/table -> set of referenced columns in downstream nodes."""
 
         raise NotImplementedError
@@ -40,7 +38,7 @@ class Adapter:
         raise NotImplementedError
 
 
-_ADAPTERS: Dict[str, Adapter] = {}
+_ADAPTERS: dict[str, Adapter] = {}
 
 
 def register_adapter(name: str, adapter: Adapter) -> None:
@@ -51,6 +49,5 @@ def get_adapter(name: str) -> Adapter:
     try:
         return _ADAPTERS[name]
     except KeyError as exc:
-        raise KeyError(f"Unknown adapter '{name}'. Available: {', '.join(sorted(_ADAPTERS))}") from exc
-
-
+        available = ", ".join(sorted(_ADAPTERS))
+        raise KeyError(f"Unknown adapter '{name}'. Available: {available}") from exc
