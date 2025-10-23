@@ -1,9 +1,7 @@
 from __future__ import annotations
 
-from typing import Dict, Set
 
-
-def _collect_columns(sql: str) -> Set[str]:
+def _collect_columns(sql: str) -> set[str]:
     try:
         import sqlglot
         from sqlglot import exp
@@ -18,7 +16,7 @@ def _collect_columns(sql: str) -> Set[str]:
     if tree is None:
         return set()
 
-    cols: Set[str] = set()
+    cols: set[str] = set()
     for col in tree.find_all(exp.Column):
         # Only bare identifiers (no star)
         if col.name and col.name != "*":
@@ -26,11 +24,9 @@ def _collect_columns(sql: str) -> Set[str]:
     return cols
 
 
-def infer_downstream_columns(sql_texts: list[str], target_aliases: set[str]) -> Dict[str, Set[str]]:
+def infer_downstream_columns(sql_texts: list[str], target_aliases: set[str]) -> dict[str, set[str]]:
     # Heuristic: return union of all referenced column identifiers as unqualified scope
-    union: Set[str] = set()
+    union: set[str] = set()
     for s in sql_texts:
         union.update(_collect_columns(s))
     return {"": union} if union else {}
-
-
