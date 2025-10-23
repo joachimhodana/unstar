@@ -74,7 +74,7 @@ unstar --write --backup
 
 ## How It Works
 
-1. **Model Selection**: Choose models using `--select` (like dbt syntax)
+1. **Model Selection**: Choose models or directories to process using `--select`
 2. **Downstream Analysis**: Analyzes downstream models to determine which columns are actually used
 3. **Star Expansion**: Replaces `SELECT *` with explicit column lists based on usage
 4. **Safe Updates**: Supports dry-run, in-place editing with backups, or output to new directory
