@@ -1,6 +1,6 @@
 # unstar
 
-Expand `SELECT *` to explicit columns using downstream model analysis.
+Expand `SELECT *` to explicit columns in dbt models using downstream model analysis.
 
 ## Installation
 
@@ -23,32 +23,19 @@ uv sync --dev
 
 ```bash
 # Dry run - see what would change
-unstar --adapter dbt --select model_a model_b --dry-run
+unstar --select model_a model_b --dry-run
 
 # Write changes in place (with backup)
-unstar --adapter dbt --select models/staging --write --backup
+unstar --select models/staging --write --backup
 
 # Use custom project directory
-unstar --adapter dbt --project-dir /path/to/dbt/project --select model_a --dry-run
+unstar --project-dir /path/to/dbt/project --select model_a --dry-run
 
 # Use custom manifest path
-unstar --adapter dbt --manifest custom/path/manifest.json --select model_a --dry-run
+unstar --manifest custom/path/manifest.json --select model_a --dry-run
 
 # Output to new directory
-unstar --adapter dbt --output ./expanded_models
-```
-
-### Individual SQL Files
-
-```bash
-# Process specific SQL files
-unstar --select model1.sql model2.sql --dry-run
-
-# Process all SQL files in a directory
-unstar --select ./sql_files --dry-run
-
-# Write changes to specific files
-unstar --select models/integration/a.sql --write --backup
+unstar --output ./expanded_models
 ```
 
 ### Quick Start
@@ -72,10 +59,9 @@ unstar --write --backup
 
 ### Command Options
 
-- `--select SELECTION` - Models/files to process (like dbt select syntax)
-- `--adapter {dbt,sql}` - Adapter to use (default: sql)
+- `--select SELECTION` - Models to process (like dbt select syntax)
 - `--project-dir PATH` - Project root directory (default: .)
-- `--manifest PATH` - Custom path to dbt manifest.json (dbt adapter only)
+- `--manifest PATH` - Custom path to dbt manifest.json
 - `--write` - Edit files in place
 - `--dry-run` - Show changes without applying (default)
 - `--output DIR` - Write updated files to directory
@@ -149,7 +135,7 @@ jobs:
         run: dbt compile
         
       - name: Check for SELECT * usage
-        run: unstar --adapter dbt --dry-run --reporter github
+        run: unstar --dry-run --reporter github
         # Exit code 1 if changes needed, 0 if all models are clean
 ```
 
@@ -162,7 +148,7 @@ repos:
     hooks:
       - id: unstar-check
         name: Check for SELECT * usage
-        entry: unstar --adapter dbt --dry-run
+        entry: unstar --dry-run
         language: system
         pass_filenames: false
         always_run: true

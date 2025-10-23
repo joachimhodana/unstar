@@ -20,7 +20,7 @@ def _build_parser() -> argparse.ArgumentParser:
 
     # Adapter selection
     parser.add_argument(
-        "--adapter", choices=["dbt", "sql"], default="sql", help="Adapter to use (default: sql)"
+        "--adapter", choices=["dbt"], default="dbt", help="Adapter to use (default: dbt)"
     )
 
     # Project directory
@@ -66,8 +66,6 @@ def main(argv: Sequence[str] | None = None) -> int:
     # Ensure adapters are registered
     if args.adapter == "dbt":
         from .adapters import dbt as _  # noqa: F401
-    elif args.adapter == "sql":
-        from .adapters import sql as _  # noqa: F401
 
     adapter = get_adapter(args.adapter)
 
@@ -81,20 +79,12 @@ def main(argv: Sequence[str] | None = None) -> int:
             print("unstar: specify --project-dir or run from dbt project root")
             return 2
 
-    # Handle --select argument (simplified like dbt)
+    # Handle --select argument (dbt models)
     if args.select:
-        # For dbt: pass as models
-        # For sql: pass as files
-        if args.adapter == "dbt":
-            targets = list(adapter.list_models(project_dir, args.select, None, args.manifest))
-        else:
-            targets = list(adapter.list_models(project_dir, args.select, None))
+        targets = list(adapter.list_models(project_dir, args.select, None, args.manifest))
     else:
-        # No selection = process all
-        if args.adapter == "dbt":
-            targets = list(adapter.list_models(project_dir, None, None, args.manifest))
-        else:
-            targets = list(adapter.list_models(project_dir, None, None))
+        # No selection = process all models
+        targets = list(adapter.list_models(project_dir, None, None, args.manifest))
 
     if not targets:
         print("unstar: no models selected")
