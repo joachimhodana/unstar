@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import pytest
-
 from unstar.adapters.dbt.artifacts import DbtArtifacts, DbtModel
 from unstar.adapters.dbt.resolver import find_models_by_names, find_models_by_path
 
@@ -13,9 +11,9 @@ class TestDbtResolver:
             models_by_name={
                 "model_a": DbtModel("model_a", "/path/a.sql", [], "id1", None, None),
                 "model_b": DbtModel("model_b", "/path/b.sql", [], "id2", None, None),
-            }
+            },
         )
-        
+
         result = list(find_models_by_names(artifacts, ["model_a", "model_c"]))
         assert len(result) == 1
         assert result[0].name == "model_a"
@@ -31,9 +29,9 @@ class TestDbtResolver:
             models_by_name={
                 "model_a": DbtModel("model_a", "/test/models/staging/a.sql", [], "id1", None, None),
                 "model_b": DbtModel("model_b", "/test/models/marts/b.sql", [], "id2", None, None),
-            }
+            },
         )
-        
+
         result = list(find_models_by_path(artifacts, "models/staging"))
         assert len(result) == 1
         assert result[0].name == "model_a"
