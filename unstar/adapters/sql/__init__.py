@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import os
-from typing import Iterable, Optional, Sequence
+from collections.abc import Iterable, Sequence
 
 from ...core.adapters import Adapter, ModelTarget, register_adapter
 
@@ -14,17 +14,18 @@ class SqlAdapter(Adapter):
         return True
 
     def list_models(
-        self, project_dir: str, models: Optional[Sequence[str]], path: Optional[str]
+        self, project_dir: str, models: Sequence[str] | None, path: str | None
     ) -> Iterable[ModelTarget]:
         # Handle direct file specification
         if models:
             for model in models:
                 if os.path.exists(model):
                     yield ModelTarget(name=os.path.basename(model), path=os.path.abspath(model))
-        
+
         # Handle path-based selection
         if path:
             import glob
+
             sql_files = glob.glob(os.path.join(path, "**/*.sql"), recursive=True)
             for sql_file in sql_files:
                 yield ModelTarget(name=os.path.basename(sql_file), path=os.path.abspath(sql_file))
@@ -36,10 +37,12 @@ class SqlAdapter(Adapter):
 
     def read_sql(self, target: ModelTarget) -> str:
         from ...core.io import read_text
+
         return read_text(target.path)
 
     def write_sql(self, target: ModelTarget, sql: str) -> None:
         from ...core.io import write_text
+
         write_text(target.path, sql)
 
 
