@@ -12,5 +12,3 @@ def get_logger(name: str = "unstar") -> logging.Logger:
         logger.addHandler(handler)
         logger.setLevel(logging.INFO)
     return logger
-
-
