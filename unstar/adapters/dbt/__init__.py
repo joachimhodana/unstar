@@ -1,12 +1,12 @@
 from __future__ import annotations
 
 import os
-from typing import Iterable, Optional, Sequence
+from collections.abc import Iterable, Sequence
 
 from ...core.adapters import Adapter, ModelTarget, register_adapter
-from .artifacts import DbtArtifacts, DbtModel, load_artifacts
-from .resolver import find_models_by_names, find_models_by_path
+from .artifacts import DbtModel, load_artifacts
 from .columns import infer_downstream_columns
+from .resolver import find_models_by_names, find_models_by_path
 
 
 class DbtAdapter(Adapter):
@@ -14,7 +14,7 @@ class DbtAdapter(Adapter):
 
     Full implementation will rely on dbt-artifacts-parser and sqlglot.
     """
-    
+
     def __init__(self):
         self._project_dir = None
 
@@ -22,7 +22,11 @@ class DbtAdapter(Adapter):
         return os.path.exists(os.path.join(project_dir, "dbt_project.yml"))
 
     def list_models(
-        self, project_dir: str, models: Optional[Sequence[str]], path: Optional[str], manifest_path: Optional[str] = None
+        self,
+        project_dir: str,
+        models: Sequence[str] | None,
+        path: str | None,
+        manifest_path: str | None = None,
     ) -> Iterable[ModelTarget]:  # type: ignore[override]
         # Store project_dir for use in read_sql
         self._project_dir = project_dir
@@ -75,6 +79,7 @@ class DbtAdapter(Adapter):
     def read_sql(self, target: ModelTarget) -> str:  # pragma: no cover - placeholder
         # For dbt, read the raw SQL file (with Jinja templates)
         from ...core.io import read_text
+
         return read_text(target.path)
 
     def write_sql(self, target: ModelTarget, sql: str) -> None:  # pragma: no cover
@@ -84,5 +89,3 @@ class DbtAdapter(Adapter):
 
 
 register_adapter("dbt", DbtAdapter())
-
-
