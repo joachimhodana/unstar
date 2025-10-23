@@ -79,6 +79,14 @@ class DbtAdapter(Adapter):
     def read_sql(self, target: ModelTarget) -> str:  # pragma: no cover - placeholder
         # For dbt, read the raw SQL file (with Jinja templates)
         from ...core.io import read_text
+        
+        # Check if file exists before trying to read it
+        if not os.path.exists(target.path):
+            raise FileNotFoundError(
+                f"Model file not found: {target.path}\n"
+                f"This usually means the dbt manifest is out of sync with the actual files.\n"
+                f"Try running 'dbt compile' to regenerate the manifest."
+            )
 
         return read_text(target.path)
 
