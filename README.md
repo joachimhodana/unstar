@@ -5,10 +5,7 @@ Expand `SELECT *` to explicit columns in dbt projects.
 ## Installation
 
 ```bash
-# Basic installation
-pip install git+https://github.com/joachimhodana/unstar.git
-
-# With dbt support
+# Basic installation with dbt support
 pip install "git+https://github.com/joachimhodana/unstar.git#egg=unstar[dbt]"
 
 # Development installation
