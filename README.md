@@ -1,6 +1,6 @@
 # unstar
 
-Expand `SELECT *` to explicit columns in dbt models using downstream model analysis.
+Expand `SELECT *` to explicit columns in dbt projects.
 
 ## Installation
 
