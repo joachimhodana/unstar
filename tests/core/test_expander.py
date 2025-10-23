@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import pytest
-
 from unstar.core.expander import expand_select_stars
 
 
@@ -82,7 +80,9 @@ class TestExpandSelectStars:
         scope = {"": {"a", "b", "c", "d"}}
         result = expand_select_stars(sql, scope)
         # Should expand to all available columns
-        expected = "select\n    a,\n    b,\n    c,\n    d\nFROM table1 t1 JOIN table2 t2 ON t1.id = t2.id"
+        expected = (
+            "select\n    a,\n    b,\n    c,\n    d\nFROM table1 t1 JOIN table2 t2 ON t1.id = t2.id"
+        )
         assert result == expected
 
     def test_sqlglot_not_available_unchanged(self):
