@@ -42,7 +42,7 @@ def _load_with_parser(
         # file_path relative to project root - prefer original_file_path as it's more reliable
         rel_path = getattr(node, "original_file_path", None) or getattr(node, "path", None) or ""
         abs_path = os.path.abspath(os.path.join(project_dir, rel_path))
-        
+
         # Debug: log path resolution for troubleshooting
         if not os.path.exists(abs_path):
             print(f"Warning: Model file not found: {abs_path} (from rel_path: {rel_path})")
@@ -76,7 +76,7 @@ def _load_raw_json(manifest_path: str, project_dir: str) -> DbtArtifacts:
         name = node.get("name")
         rel_path = node.get("original_file_path") or node.get("path") or ""
         abs_path = os.path.abspath(os.path.join(project_dir, rel_path))
-        
+
         # Debug: log path resolution for troubleshooting
         if not os.path.exists(abs_path):
             print(f"Warning: Model file not found: {abs_path} (from rel_path: {rel_path})")

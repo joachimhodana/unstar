@@ -79,7 +79,7 @@ class DbtAdapter(Adapter):
     def read_sql(self, target: ModelTarget) -> str:  # pragma: no cover - placeholder
         # For dbt, read the raw SQL file (with Jinja templates)
         from ...core.io import read_text
-        
+
         # Check if file exists before trying to read it
         if not os.path.exists(target.path):
             raise FileNotFoundError(
