@@ -1,13 +1,11 @@
 from __future__ import annotations
 
-from typing import Dict, Set
-
 
 class ExpansionWarning(Exception):
     pass
 
 
-def expand_select_stars(sql: str, scope_columns: Dict[str, Set[str]]) -> str:
+def expand_select_stars(sql: str, scope_columns: dict[str, set[str]]) -> str:
     """Expand SELECT * and qualifier.* using provided column scope.
 
     - scope_columns maps alias/table identifier -> set of column names
@@ -17,15 +15,15 @@ def expand_select_stars(sql: str, scope_columns: Dict[str, Set[str]]) -> str:
     """
 
     import re
-    
+
     # Get all available columns
     all_cols = set()
     for cols in scope_columns.values():
         all_cols.update(cols)
-    
+
     if not all_cols:
         return sql
-    
+
     # Simple regex-based replacement that preserves formatting
     def replace_select_star(match):
         # Get the indentation from the original line
@@ -38,13 +36,11 @@ def expand_select_stars(sql: str, scope_columns: Dict[str, Set[str]]) -> str:
             return f"select\n{cols_str}\n{indent}{rest_of_line}"
         else:
             return f"select\n{cols_str}"
-    
+
     # Pattern to match SELECT * at the beginning of a line (not in comments)
-    pattern = r'^(\s*)select\s+\*(.*)$'
-    
+    pattern = r"^(\s*)select\s+\*(.*)$"
+
     # Replace SELECT * with explicit columns
     result = re.sub(pattern, replace_select_star, sql, flags=re.IGNORECASE | re.MULTILINE)
-    
+
     return result
-
-
