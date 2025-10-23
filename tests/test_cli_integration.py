@@ -52,7 +52,7 @@ class TestCliIntegration:
             # Create minimal dbt project structure
             (Path(tmpdir) / "dbt_project.yml").write_text("name: test")
             (Path(tmpdir) / "target").mkdir()
-            
+
             # Create empty manifest
             manifest_path = Path(tmpdir) / "target" / "manifest.json"
             with open(manifest_path, "w") as f:
@@ -78,7 +78,7 @@ class TestCliIntegration:
             # Create minimal dbt project structure
             (Path(tmpdir) / "dbt_project.yml").write_text("name: test")
             (Path(tmpdir) / "target").mkdir()
-            
+
             # Create empty manifest
             manifest_path = Path(tmpdir) / "target" / "manifest.json"
             with open(manifest_path, "w") as f:
