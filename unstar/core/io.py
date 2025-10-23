@@ -3,7 +3,6 @@ from __future__ import annotations
 import difflib
 import os
 from pathlib import Path
-from typing import Tuple
 
 
 def read_text(path: str) -> str:
@@ -27,5 +26,3 @@ def unified_diff(a_path: str, a_text: str, b_path: str, b_text: str) -> str:
             a_text.splitlines(), b_text.splitlines(), fromfile=a_path, tofile=b_path, lineterm=""
         )
     )
-
-
