@@ -3,48 +3,60 @@ from __future__ import annotations
 import argparse
 import os
 import sys
-from typing import Optional, Sequence
+from collections.abc import Sequence
 
 from . import __version__
 from .core.adapters import get_adapter
-from .core.io import ensure_backup, read_text, unified_diff, write_text
 from .core.expander import expand_select_stars
+from .core.io import ensure_backup, unified_diff, write_text
 
 
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="unstar", description="Expand SELECT * safely")
     parser.add_argument("-V", "--version", action="version", version=__version__)
-    
+
     # Simplified selection - just use --select like dbt
     parser.add_argument("--select", nargs="*", help="Models/files to process")
-    
+
     # Adapter selection
-    parser.add_argument("--adapter", choices=["dbt", "sql"], default="sql", help="Adapter to use (default: sql)")
-    
+    parser.add_argument(
+        "--adapter", choices=["dbt", "sql"], default="sql", help="Adapter to use (default: sql)"
+    )
+
     # Project directory
     parser.add_argument("--project-dir", default=".", help="Project root directory (default: .)")
-    
+
     # dbt-specific options
     parser.add_argument("--manifest", help="Custom path to dbt manifest.json (dbt adapter only)")
-    
+
     # Output modes
     modes = parser.add_mutually_exclusive_group()
     modes.add_argument("--write", action="store_true", help="Edit files in place")
-    modes.add_argument("--dry-run", action="store_true", help="Show changes without applying (default)")
+    modes.add_argument(
+        "--dry-run", action="store_true", help="Show changes without applying (default)"
+    )
     modes.add_argument("--output", help="Write updated files to directory")
-    
+
     # Reporter options for dry-run
-    parser.add_argument("--reporter", choices=["human", "diff", "github"], default="human", 
-                       help="Output format for dry-run (default: human)")
-    
+    parser.add_argument(
+        "--reporter",
+        choices=["human", "diff", "github"],
+        default="human",
+        help="Output format for dry-run (default: human)",
+    )
+
     # Other options
-    parser.add_argument("--backup", action="store_true", default=False, help="Create .bak files when writing")
-    parser.add_argument("--verbose", action="store_true", default=False, help="Show detailed output")
+    parser.add_argument(
+        "--backup", action="store_true", default=False, help="Create .bak files when writing"
+    )
+    parser.add_argument(
+        "--verbose", action="store_true", default=False, help="Show detailed output"
+    )
 
     return parser
 
 
-def main(argv: Optional[Sequence[str]] = None) -> int:
+def main(argv: Sequence[str] | None = None) -> int:
     if argv is None:
         argv = sys.argv[1:]
 
@@ -83,7 +95,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             targets = list(adapter.list_models(project_dir, None, None, args.manifest))
         else:
             targets = list(adapter.list_models(project_dir, None, None))
-    
+
     if not targets:
         print("unstar: no models selected")
         return 0
@@ -111,7 +123,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 print(f"::warning file={t.path}::SELECT * can be expanded to explicit columns")
             elif args.reporter == "human":
                 # Human-readable format - simple one line
-                columns = sorted(scope.get('', set()))
+                columns = sorted(scope.get("", set()))
                 if columns:
                     print(f"Model {t.name}: SELECT * → {', '.join(columns)}")
                 else:
@@ -133,12 +145,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         # Default when no mode provided: dry-run
         diff = unified_diff(t.path, original_sql, t.path, new_sql)
         print(diff)
-    
-    
+
     # Return 1 if changes were detected in dry-run mode (for CI/linting)
     if args.dry_run and changes_detected:
         return 1
-    
+
     return exit_code
 
 
