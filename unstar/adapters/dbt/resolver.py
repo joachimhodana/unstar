@@ -1,15 +1,15 @@
 from __future__ import annotations
 
 import os
-from typing import Iterable, List, Optional
+from collections.abc import Iterable
 
 from .artifacts import DbtArtifacts, DbtModel
 
 
-def find_models_by_names(artifacts: DbtArtifacts, names: Optional[Iterable[str]]) -> List[DbtModel]:
+def find_models_by_names(artifacts: DbtArtifacts, names: Iterable[str] | None) -> list[DbtModel]:
     if not names:
         return []
-    result: List[DbtModel] = []
+    result: list[DbtModel] = []
     for name in names:
         model = artifacts.models_by_name.get(name)
         if model:
@@ -17,11 +17,11 @@ def find_models_by_names(artifacts: DbtArtifacts, names: Optional[Iterable[str]]
     return result
 
 
-def find_models_by_path(artifacts: DbtArtifacts, base_path: Optional[str]) -> List[DbtModel]:
+def find_models_by_path(artifacts: DbtArtifacts, base_path: str | None) -> list[DbtModel]:
     if not base_path:
         return []
     abs_base = os.path.abspath(os.path.join(artifacts.project_dir, base_path))
-    out: List[DbtModel] = []
+    out: list[DbtModel] = []
     for m in artifacts.models_by_name.values():
         try:
             m_dir = os.path.dirname(m.path)
@@ -30,5 +30,3 @@ def find_models_by_path(artifacts: DbtArtifacts, base_path: Optional[str]) -> Li
         except Exception:
             continue
     return out
-
-
