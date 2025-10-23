@@ -14,14 +14,20 @@ class DbtAdapter(Adapter):
 
     Full implementation will rely on dbt-artifacts-parser and sqlglot.
     """
+    
+    def __init__(self):
+        self._project_dir = None
 
     def detect(self, project_dir: str) -> bool:  # pragma: no cover - simple stub
         return os.path.exists(os.path.join(project_dir, "dbt_project.yml"))
 
     def list_models(
-        self, project_dir: str, models: Optional[Sequence[str]], path: Optional[str]
+        self, project_dir: str, models: Optional[Sequence[str]], path: Optional[str], manifest_path: Optional[str] = None
     ) -> Iterable[ModelTarget]:  # type: ignore[override]
-        artifacts = load_artifacts(project_dir)
+        # Store project_dir for use in read_sql
+        self._project_dir = project_dir
+        # Use custom manifest path if provided
+        artifacts = load_artifacts(project_dir, manifest_path)
         if artifacts is None:
             return []
 
@@ -29,10 +35,14 @@ class DbtAdapter(Adapter):
         selected.extend(find_models_by_names(artifacts, models))
         selected.extend(find_models_by_path(artifacts, path))
 
+        # If no specific selection, return all models
+        if not selected:
+            selected = list(artifacts.models_by_name.values())
+
         # de-duplicate by name
         seen: set[str] = set()
         out: list[ModelTarget] = []
-        for m in selected or list(artifacts.models_by_name.values()):
+        for m in selected:
             if m.name in seen:
                 continue
             seen.add(m.name)
@@ -63,8 +73,8 @@ class DbtAdapter(Adapter):
         return cols
 
     def read_sql(self, target: ModelTarget) -> str:  # pragma: no cover - placeholder
+        # For dbt, read the raw SQL file (with Jinja templates)
         from ...core.io import read_text
-
         return read_text(target.path)
 
     def write_sql(self, target: ModelTarget, sql: str) -> None:  # pragma: no cover

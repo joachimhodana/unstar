@@ -6,13 +6,13 @@ Expand `SELECT *` to explicit columns using downstream model analysis.
 
 ```bash
 # Basic installation
-pip install git+https://github.com/your-org/unstar.git
+pip install git+https://github.com/joachimhodana/unstar.git
 
 # With dbt support
-pip install "git+https://github.com/your-org/unstar.git#egg=unstar[dbt]"
+pip install "git+https://github.com/joachimhodana/unstar.git#egg=unstar[dbt]"
 
 # Development installation
-git clone https://github.com/your-org/unstar.git
+git clone https://github.com/joachimhodana/unstar.git
 cd unstar
 uv sync --dev
 ```
@@ -23,20 +23,39 @@ uv sync --dev
 
 ```bash
 # Dry run - see what would change
-unstar --project-dir . --models model_a model_b --dry-run
+unstar --adapter dbt --select model_a model_b --dry-run
 
 # Write changes in place (with backup)
-unstar --path models/staging --write --backup
+unstar --adapter dbt --select models/staging --write --backup
+
+# Use custom project directory
+unstar --adapter dbt --project-dir /path/to/dbt/project --select model_a --dry-run
+
+# Use custom manifest path
+unstar --adapter dbt --manifest custom/path/manifest.json --select model_a --dry-run
 
 # Output to new directory
-unstar --output ./expanded_models
+unstar --adapter dbt --output ./expanded_models
+```
+
+### Individual SQL Files
+
+```bash
+# Process specific SQL files
+unstar --select model1.sql model2.sql --dry-run
+
+# Process all SQL files in a directory
+unstar --select ./sql_files --dry-run
+
+# Write changes to specific files
+unstar --select models/integration/a.sql --write --backup
 ```
 
 ### Quick Start
 
 ```bash
 # Install with dbt support
-pip install "git+https://github.com/your-org/unstar.git#egg=unstar[dbt]"
+pip install "git+https://github.com/joachimhodana/unstar.git#egg=unstar[dbt]"
 
 # Navigate to your dbt project
 cd your-dbt-project
@@ -53,19 +72,26 @@ unstar --write --backup
 
 ### Command Options
 
-- `--adapter {dbt}` - Adapter to use (default: dbt)
+- `--select SELECTION` - Models/files to process (like dbt select syntax)
+- `--adapter {dbt,sql}` - Adapter to use (default: sql)
 - `--project-dir PATH` - Project root directory (default: .)
-- `--models MODEL1 MODEL2` - Specific models to process
-- `--path PATH` - Directory containing models to process
+- `--manifest PATH` - Custom path to dbt manifest.json (dbt adapter only)
 - `--write` - Edit files in place
-- `--dry-run` - Show diff without making changes (default)
+- `--dry-run` - Show changes without applying (default)
 - `--output DIR` - Write updated files to directory
+- `--reporter {human,diff,github}` - Output format for dry-run (default: human)
 - `--backup` - Create .bak files when writing in place
 - `--verbose` - Show detailed output
 
+### Reporter Formats
+
+- `human` - Human-readable summary (default)
+- `diff` - Unified diff format
+- `github` - GitHub Actions annotations format
+
 ## How It Works
 
-1. **Model Selection**: Choose models by name (`--models`) or directory (`--path`)
+1. **Model Selection**: Choose models using `--select` (like dbt syntax)
 2. **Downstream Analysis**: Analyzes downstream models to determine which columns are actually used
 3. **Star Expansion**: Replaces `SELECT *` with explicit column lists based on usage
 4. **Safe Updates**: Supports dry-run, in-place editing with backups, or output to new directory
@@ -91,11 +117,68 @@ SELECT id, name, email FROM {{ ref('raw_users') }}
 - Ambiguous joins may produce warnings
 - No downstream usage found will leave `*` unchanged
 
+## CI/CD Integration
+
+Use `unstar` in your CI pipeline to enforce explicit column selection:
+
+### GitHub Actions Example
+
+Lint SQL models for SELECT * usage in CI/CD pipeline.
+
+```yaml
+name: Lint SQL Models
+on: [push, pull_request]
+
+jobs:
+  lint-sql:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          
+      - name: Install dbt and unstar
+        run: |
+          pip install dbt-core
+          pip install "git+https://github.com/joachimhodana/unstar.git#egg=unstar[dbt]"
+          
+      - name: Compile dbt models
+        run: dbt compile
+        
+      - name: Check for SELECT * usage
+        run: unstar --adapter dbt --dry-run --reporter github
+        # Exit code 1 if changes needed, 0 if all models are clean
+```
+
+### Pre-commit Hook
+
+```yaml
+# .pre-commit-config.yaml
+repos:
+  - repo: local
+    hooks:
+      - id: unstar-check
+        name: Check for SELECT * usage
+        entry: unstar --adapter dbt --dry-run
+        language: system
+        pass_filenames: false
+        always_run: true
+```
+
+### Exit Codes
+
+- `0`: No changes needed (all models use explicit columns)
+- `1`: Changes detected (some models have `SELECT *` that can be expanded)
+- `2`: Error occurred (invalid arguments, missing files, etc.)
+
 ## Development
 
 ```bash
 # Clone and setup
-git clone https://github.com/your-org/unstar.git
+git clone https://github.com/joachimhodana/unstar.git
 cd unstar
 
 # Install with uv (recommended)

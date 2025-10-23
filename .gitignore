@@ -26,3 +26,5 @@ htmlcov/
 # IDE
 .vscode/
 .idea/
+
+tests/__dbt_test/

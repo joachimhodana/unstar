@@ -1,10 +1,6 @@
 from __future__ import annotations
 
-from typing import Iterable
-
-
-def is_star_token(token: str) -> bool:
-    # Placeholder helper; will be replaced by sqlglot-based detection
-    return token.strip() == "*"
+# This module is reserved for future SQL utility functions
+# Currently, all SQL parsing is handled directly in expander.py using sqlglot
 
 

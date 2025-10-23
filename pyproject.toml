@@ -35,9 +35,9 @@ dbt = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/your-org/unstar"
-Repository = "https://github.com/your-org/unstar"
-Issues = "https://github.com/your-org/unstar/issues"
+Homepage = "https://github.com/joachimhodana/unstar"
+Repository = "https://github.com/joachimhodana/unstar"
+Issues = "https://github.com/joachimhodana/unstar/issues"
 
 [project.scripts]
 unstar = "unstar.cli:main"
