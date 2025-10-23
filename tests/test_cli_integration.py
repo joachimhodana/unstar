@@ -1,10 +1,8 @@
 from __future__ import annotations
 
 import json
-import os
 import tempfile
 from pathlib import Path
-from unittest.mock import patch
 
 import pytest
 
@@ -38,17 +36,13 @@ class TestCliIntegration:
             # Create minimal dbt project structure
             (Path(tmpdir) / "dbt_project.yml").write_text("name: test")
             (Path(tmpdir) / "target").mkdir()
-            
+
             # Create empty manifest
             manifest_path = Path(tmpdir) / "target" / "manifest.json"
             with open(manifest_path, "w") as f:
                 json.dump({"nodes": {}}, f)
-            
-            result = main([
-                "--adapter", "dbt",
-                "--project-dir", tmpdir,
-                "--dry-run"
-            ])
+
+            result = main(["--adapter", "dbt", "--project-dir", tmpdir, "--dry-run"])
             assert result == 0
 
     def test_with_models(self):
@@ -57,29 +51,18 @@ class TestCliIntegration:
             # Create a test SQL file
             sql_file = Path(tmpdir) / "test.sql"
             sql_file.write_text("SELECT * FROM table")
-            
-            result = main([
-                "--adapter", "sql",
-                "--select", str(sql_file),
-                "--dry-run"
-            ])
+
+            result = main(["--adapter", "sql", "--select", str(sql_file), "--dry-run"])
             assert result == 0
 
     def test_invalid_adapter(self):
         with pytest.raises(SystemExit) as exc_info:
-            main([
-                "--adapter", "invalid",
-                "--dry-run"
-            ])
+            main(["--adapter", "invalid", "--dry-run"])
         assert exc_info.value.code == 2
 
     def test_mutually_exclusive_modes(self):
         with pytest.raises(SystemExit) as exc_info:
-            main([
-                "--write",
-                "--dry-run",
-                "--output", "/tmp"
-            ])
+            main(["--write", "--dry-run", "--output", "/tmp"])
         # Should fail due to mutually exclusive options
         assert exc_info.value.code == 2
 
@@ -89,30 +72,21 @@ class TestCliIntegration:
             # Create a test SQL file
             sql_file = Path(tmpdir) / "test.sql"
             sql_file.write_text("SELECT * FROM table")
-            
+
             # Test human reporter (default)
-            result = main([
-                "--adapter", "sql",
-                "--select", str(sql_file),
-                "--dry-run",
-                "--reporter", "human"
-            ])
+            result = main(
+                ["--adapter", "sql", "--select", str(sql_file), "--dry-run", "--reporter", "human"]
+            )
             assert result == 0  # No changes detected in this case
-                
+
             # Test diff reporter
-            result = main([
-                "--adapter", "sql",
-                "--select", str(sql_file),
-                "--dry-run",
-                "--reporter", "diff"
-            ])
+            result = main(
+                ["--adapter", "sql", "--select", str(sql_file), "--dry-run", "--reporter", "diff"]
+            )
             assert result == 0
-                
+
             # Test github reporter
-            result = main([
-                "--adapter", "sql",
-                "--select", str(sql_file),
-                "--dry-run",
-                "--reporter", "github"
-            ])
+            result = main(
+                ["--adapter", "sql", "--select", str(sql_file), "--dry-run", "--reporter", "github"]
+            )
             assert result == 0
